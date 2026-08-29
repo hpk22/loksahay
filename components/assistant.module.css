@@ -1,0 +1,753 @@
+/*
+  Styles for components/assistant.tsx.
+
+  Rules this file obeys:
+
+  * Colour comes only from the design-system custom properties declared in
+    app/globals.css. Every var() carries a neutral fallback so a token rename
+    upstream degrades rather than breaks. No literal brand hex values.
+  * html.hc (high contrast) flips those tokens to black and #ffe600. Anywhere a
+    gradient, a tint or a shadow was doing the work of telling two things apart,
+    there is a :global(html.hc) rule that puts a border there instead.
+  * html[data-fs="lg"|"xl"] enlarges every text size. Nothing that contains text
+    has a fixed height — only min-height — and the transcript scrolls.
+  * Layout holds to 360px. Below 560px the panel goes full-screen and the
+    launcher drops its second line so it cannot cover the page's own CTAs.
+
+  z-index: 150.
+    The site chrome is not sticky, so it needs nothing special, but the language
+    switcher sheet sits at 90 and the sticky action bar at 20, and this must
+    clear both. It stays below the skip link (200) so keyboard users can always
+    reach it, and below the language gate modal (300) which must cover the page
+    completely on first visit.
+*/
+
+.dock {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 150;
+}
+
+/* ------------------------------- launcher -------------------------------- */
+
+/*
+  Not a bare circle. A person who cannot read an icon still reads "Need help?"
+  — the words are the affordance, the seal only anchors it to this site. It
+  stays low and narrow so a thumb-width of page stays visible beside it.
+*/
+.launcher {
+  display: flex;
+  align-items: stretch;
+  background: var(--paper, #fff);
+  border: 1px solid var(--line-strong, #cbc5bc);
+  border-radius: var(--radius-pill, 999px);
+  box-shadow: var(--shadow-2, 0 8px 20px rgba(0, 0, 0, 0.12));
+  overflow: hidden;
+  max-width: calc(100vw - 32px);
+}
+
+.launcherMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  color: var(--ink, #16181d);
+  text-align: left;
+  cursor: pointer;
+  padding: 8px 12px 8px 10px;
+  min-height: var(--tap, 48px);
+  min-width: 0;
+}
+
+.launcherMain:hover {
+  background: var(--maroon-tint, #fbf2f6);
+}
+
+.launcherMark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 34px;
+  min-height: 34px;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--maroon, #6b0f3a);
+  color: var(--paper, #fff);
+}
+
+.launcherText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.launcherText strong {
+  font-size: 0.92em;
+  font-weight: 800;
+}
+
+.launcherSub {
+  font-size: 0.74em;
+  color: var(--muted, #5c616b);
+  white-space: nowrap;
+}
+
+/* The one-word label only appears when the two-line one would be too fat. */
+.launcherShort {
+  display: none;
+  font-size: 0.74em;
+  color: var(--muted, #5c616b);
+}
+
+.launcherX {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 38px;
+  min-height: var(--tap, 48px);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--line, #e3dfd9);
+  color: var(--muted, #5c616b);
+  cursor: pointer;
+  padding: 0;
+}
+
+.launcherX:hover {
+  background: var(--maroon-tint, #fbf2f6);
+  color: var(--ink, #16181d);
+}
+
+/* --------------------------------- panel --------------------------------- */
+
+.panel {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 150;
+  width: min(380px, calc(100vw - 32px));
+  /* A height, not a fixed one: the transcript takes the slack when the text
+     size control enlarges everything. vh first, for browsers without dvh. */
+  height: min(560px, calc(100vh - 32px));
+  height: min(560px, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  background: var(--page, #f6f5f3);
+  border: 1px solid var(--line-strong, #cbc5bc);
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: var(--shadow-3, 0 12px 40px rgba(0, 0, 0, 0.24));
+  overflow: hidden;
+}
+
+.panel:focus {
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 12px 12px 14px;
+  background: var(--maroon, #6b0f3a);
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+.headMark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #fff;
+}
+
+.headText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.headText strong {
+  font-size: 0.98em;
+  font-weight: 800;
+}
+
+.headSub {
+  font-size: 0.74em;
+  opacity: 0.9;
+}
+
+.headX {
+  margin-left: auto;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  min-height: 40px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--radius, 8px);
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+}
+
+.headX:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ------------------------------ state strip ------------------------------ */
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 14px;
+  background: var(--paper, #fff);
+  border-bottom: 1px solid var(--line, #e3dfd9);
+  flex: 0 0 auto;
+}
+
+.orb {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 40px;
+  min-height: 40px;
+  border-radius: var(--radius-pill, 999px);
+  border: 2px solid var(--line-strong, #cbc5bc);
+  background: var(--paper-2, #fbfaf8);
+  color: var(--muted, #5c616b);
+}
+
+.orb[data-phase="listening"] {
+  border-color: var(--maroon, #6b0f3a);
+  background: var(--maroon-tint, #fbf2f6);
+  color: var(--brand-fg, #6b0f3a);
+  animation: haloListen 1.6s ease-out infinite;
+}
+
+.orb[data-phase="thinking"] {
+  border-color: var(--navy, #0b2a5b);
+  background: var(--navy-tint, #eef3fb);
+  color: var(--accent-fg, #0b2a5b);
+}
+
+.orb[data-phase="speaking"] {
+  border-color: var(--saffron, #c2600b);
+  background: var(--saffron-tint, #fdf4e7);
+  color: var(--saffron, #c2600b);
+  animation: haloSpeak 1.8s ease-out infinite;
+}
+
+@keyframes haloListen {
+  0% { box-shadow: 0 0 0 0 rgba(107, 15, 58, 0.45); }
+  100% { box-shadow: 0 0 0 12px rgba(107, 15, 58, 0); }
+}
+
+@keyframes haloSpeak {
+  0% { box-shadow: 0 0 0 0 rgba(194, 96, 11, 0.45); }
+  100% { box-shadow: 0 0 0 12px rgba(194, 96, 11, 0); }
+}
+
+/* The equalizer bars while listening, and the dots while thinking. */
+.bar1, .bar2, .bar3, .bar4 {
+  transform-origin: center;
+  animation: barBeat 1s ease-in-out infinite;
+}
+.bar2 { animation-delay: 0.14s; }
+.bar3 { animation-delay: 0.28s; }
+.bar4 { animation-delay: 0.42s; }
+
+@keyframes barBeat {
+  0%, 100% { transform: scaleY(0.45); opacity: 0.55; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+
+.wave1, .wave2 {
+  animation: waveOut 1.4s ease-in-out infinite;
+}
+.wave2 { animation-delay: 0.22s; }
+
+@keyframes waveOut {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+
+.statusText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.statusText strong {
+  font-size: 0.88em;
+  font-weight: 700;
+}
+
+/* Which speech engine is genuinely live. The honesty panel claims Sarvam; this
+   is where that claim is either kept or visibly broken. */
+.engine {
+  font-size: 0.7em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted, #5c616b);
+}
+
+.engine[data-engine="sarvam"] { color: var(--good, #0f7a4e); }
+.engine[data-engine="browser"] { color: var(--warn, #8a5300); }
+
+/* ------------------------------- transcript ------------------------------ */
+
+.log {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: var(--page, #f6f5f3);
+}
+
+.bubble {
+  position: relative;
+  max-width: 88%;
+  margin: 0;
+  padding: 10px 13px;
+  border-radius: var(--radius-lg, 14px);
+  font-size: 0.92em;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.them {
+  align-self: flex-start;
+  background: var(--paper, #fff);
+  border: 1px solid var(--line, #e3dfd9);
+  border-bottom-left-radius: 4px;
+  color: var(--ink, #16181d);
+}
+
+.me {
+  align-self: flex-end;
+  background: var(--navy, #0b2a5b);
+  border: 1px solid var(--navy, #0b2a5b);
+  border-bottom-right-radius: 4px;
+  color: #fff;
+}
+
+.interim {
+  opacity: 0.62;
+}
+
+.thinking {
+  min-height: 0;
+}
+
+/* The speaker's name, small but present, so the two voices never blur. */
+.who {
+  display: block;
+  font-size: 0.68em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.65;
+  margin-bottom: 2px;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.3;
+  animation: blink 1.3s infinite;
+}
+.dots i:nth-child(2) { animation-delay: 0.18s; }
+.dots i:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes blink {
+  0%, 80%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+
+/* --------------------------------- footer -------------------------------- */
+
+.foot {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 11px 14px calc(13px + env(safe-area-inset-bottom, 0px));
+  background: var(--paper, #fff);
+  border-top: 1px solid var(--line, #e3dfd9);
+  max-height: 62%;
+  overflow-y: auto;
+}
+
+.note {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: var(--radius, 8px);
+  border: 1px solid var(--line, #e3dfd9);
+  border-left: 4px solid var(--muted, #5c616b);
+  font-size: 0.8em;
+  line-height: 1.45;
+}
+
+.noteWarn {
+  background: var(--warn-soft, #fdf5e6);
+  border-left-color: var(--saffron, #c2600b);
+  color: var(--ink-2, #3d4149);
+}
+
+.noteBad {
+  background: var(--bad-soft, #fcefed);
+  border-left-color: var(--bad, #a11c15);
+  color: var(--ink-2, #3d4149);
+}
+
+.signpost {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.signpost strong {
+  font-weight: 800;
+}
+
+.signpostLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.link {
+  color: var(--link, #12468f);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line-strong, #cbc5bc);
+  border-radius: var(--radius-pill, 999px);
+  padding: 2px 10px;
+  font-weight: 700;
+}
+
+/* ------------------------------- controls -------------------------------- */
+
+.talk {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius, 8px);
+  background: var(--saffron-bright, #e8891f);
+  color: #241500;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.talk:hover:not(:disabled) {
+  background: #f59a2e;
+}
+
+.talk[data-on="true"] {
+  background: var(--maroon, #6b0f3a);
+  color: #fff;
+}
+
+.talk:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.talkMark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.talkText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.talkText strong {
+  font-size: 0.95em;
+  font-weight: 800;
+}
+
+.talkText span {
+  font-size: 0.72em;
+  opacity: 0.85;
+}
+
+.handoff {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  width: 100%;
+  min-height: var(--tap, 48px);
+  padding: 9px 14px;
+  border: 1px solid var(--navy, #0b2a5b);
+  border-radius: var(--radius, 8px);
+  background: var(--navy, #0b2a5b);
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  font-size: 0.92em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.handoff:hover {
+  background: var(--navy-deep, #061c40);
+}
+
+.handoffHint {
+  font-weight: 400;
+  font-size: 0.76em;
+  opacity: 0.85;
+}
+
+.compose {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--tap, 48px);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.92em;
+  color: var(--ink, #16181d);
+  background: var(--paper, #fff);
+  border: 1.5px solid var(--line-strong, #cbc5bc);
+  border-radius: var(--radius, 8px);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--navy, #0b2a5b);
+  box-shadow: var(--ring, 0 0 0 3px rgba(232, 137, 31, 0.55));
+}
+
+.sendBtn {
+  flex: 0 0 auto;
+  min-height: var(--tap, 48px);
+  padding: 0 16px;
+  border: 1px solid var(--line-strong, #cbc5bc);
+  border-radius: var(--radius, 8px);
+  background: var(--paper, #fff);
+  color: var(--accent-fg, #0b2a5b);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: var(--navy-tint, #eef3fb);
+  border-color: var(--navy, #0b2a5b);
+}
+
+.sendBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------ focus rings ------------------------------ */
+
+.launcherMain:focus-visible,
+.launcherX:focus-visible,
+.headX:focus-visible,
+.talk:focus-visible,
+.handoff:focus-visible,
+.sendBtn:focus-visible,
+.link:focus-visible {
+  outline: 3px solid var(--saffron-bright, #e8891f);
+  outline-offset: 2px;
+}
+
+/* ------------------------- high contrast (html.hc) ----------------------- */
+
+/*
+  In hc every token collapses to black and #ffe600 and every shadow is removed,
+  so the tint that separated "me" from "them", and the coloured halo that said
+  who was talking, both disappear. Borders and shape do the work instead.
+*/
+:global(html.hc) .launcher,
+:global(html.hc) .panel {
+  border: 2px solid #ffe600;
+  background: #000;
+}
+
+:global(html.hc) .launcherMark {
+  border: 2px solid #ffe600;
+  background: #000;
+  color: #ffe600;
+}
+
+:global(html.hc) .head {
+  background: #000;
+  color: #ffe600;
+  border-bottom: 2px solid #ffe600;
+}
+
+:global(html.hc) .headX,
+:global(html.hc) .headMark {
+  color: #ffe600;
+  border-color: #ffe600;
+}
+
+:global(html.hc) .status,
+:global(html.hc) .log,
+:global(html.hc) .foot {
+  background: #000;
+}
+
+:global(html.hc) .orb {
+  background: #000;
+  color: #ffe600;
+  border: 2px solid #ffe600;
+  animation: none;
+}
+
+/* Colour cannot say who is talking any more, so weight of border does. */
+:global(html.hc) .orb[data-phase="listening"],
+:global(html.hc) .orb[data-phase="speaking"] {
+  border-width: 4px;
+}
+
+:global(html.hc) .them,
+:global(html.hc) .me {
+  background: #000;
+  color: #ffe600;
+  border: 2px solid #ffe600;
+}
+
+/* "You" keeps the square-off corner and gains a doubled edge so the two sides
+   of the conversation stay distinguishable without any fill. */
+:global(html.hc) .me {
+  outline: 2px solid #ffe600;
+  outline-offset: 2px;
+}
+
+:global(html.hc) .talk,
+:global(html.hc) .handoff,
+:global(html.hc) .sendBtn,
+:global(html.hc) .input,
+:global(html.hc) .note,
+:global(html.hc) .tag {
+  background: #000 !important;
+  color: #ffe600 !important;
+  border: 2px solid #ffe600 !important;
+}
+
+:global(html.hc) .talk[data-on="true"] {
+  border-width: 4px !important;
+}
+
+:global(html.hc) .engine,
+:global(html.hc) .link,
+:global(html.hc) .who,
+:global(html.hc) .launcherSub,
+:global(html.hc) .launcherShort,
+:global(html.hc) .launcherMain,
+:global(html.hc) .launcherX {
+  color: #ffe600;
+  opacity: 1;
+}
+
+/* -------------------------------- motion --------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .bar1, .bar2, .bar3, .bar4,
+  .wave1, .wave2,
+  .dots i {
+    animation: none !important;
+  }
+  /* With the movement gone the silhouettes still differ — bars, dots, a
+     speaker cone, a microphone — and the ring thickens to mark an active turn. */
+  .orb[data-phase="listening"],
+  .orb[data-phase="speaking"] {
+    border-width: 4px;
+  }
+  .dots i { opacity: 0.75; }
+}
+
+/* ------------------------------ small screens ---------------------------- */
+
+@media (max-width: 560px) {
+  .panel {
+    right: 0;
+    bottom: 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+  .foot { max-height: 55%; }
+}
+
+/*
+  At 360px a two-line pill would sit across a third of the screen. Drop to the
+  short label and tuck the dock in, so the page's own buttons stay reachable.
+*/
+@media (max-width: 420px) {
+  .dock {
+    right: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+  .launcherSub { display: none; }
+  .launcherShort { display: block; }
+  .launcherMain { padding: 6px 10px 6px 8px; gap: 8px; }
+}

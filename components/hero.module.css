@@ -1,0 +1,305 @@
+/*
+  Hero band — scoped styles for components/hero.tsx.
+
+  Rules this file obeys, because the site has a working high-contrast mode and
+  a working text-size control:
+
+  1. Colour comes only from the tokens declared in app/globals.css. There is
+     no literal hex anywhere below.
+  2. html.hc collapses --maroon, --navy and --paper all to #000, and raises
+     --ink / --muted / --line to #ffe600. So --maroon and --navy are used ONLY
+     as backgrounds, never as a text colour on paper (that would render black
+     on black in high contrast). Every pairing that would break has an explicit
+     :global(html.hc) override below. Borders need no override: globals.css
+     already forces `html.hc * { border-color: #ffe600 !important }`.
+  3. No background images, no gradients, no opacity tricks. Solid token
+     backgrounds and real 1px borders only, so nothing depends on a filter or
+     an alpha channel surviving high-contrast mode.
+  4. No fixed `height` on anything containing text — min-height and padding.
+  5. Type is sized in `em` so it tracks html[data-fs="lg"|"xl"], which raise
+     --fs on <html>. `em` resolves against the section, which inherits body's
+     font-size: var(--fs). The global h1/h2/.kpi rules are in fixed px and so
+     ignore the text-size control; they are overridden here for that reason.
+  6. Grids use auto-fit + minmax, so they collapse to one column well before
+     360px without a media query and never force a horizontal scroll.
+
+  Class names are deliberately distinct from the global .hero / .step / .chips
+  / .trustbar classes in globals.css. CSS Modules hashes these anyway, but the
+  distinct names keep the two sets legible side by side.
+*/
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* ---------- 1. the promise ---------- */
+
+.band {
+  background: var(--maroon);
+  color: var(--paper);
+  border-radius: var(--radius-lg);
+  border-bottom: 4px solid var(--saffron-bright);
+  box-shadow: var(--shadow-1);
+  padding: 1.5em 1.4em 1.6em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55em;
+}
+
+/* --maroon and --paper are both #000 in high contrast, so the band goes black
+   and the text has to come back as --ink. --saffron-bright is already #ffe600
+   there, so the bottom rule survives on its own. */
+:global(html.hc) .band {
+  color: var(--ink);
+}
+
+.eyebrow {
+  font-family: var(--font-display), var(--font-ui), sans-serif;
+  font-size: 0.76em;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--saffron-bright);
+}
+
+.headline {
+  /* Overrides the global h1 clamp, which is in fixed px and therefore ignores
+     the text-size control. This one scales with --fs and with the viewport. */
+  font-size: clamp(1.4em, 1.1em + 1.6vw, 2.1em);
+  line-height: 1.18;
+  color: inherit;
+  max-width: 20ch;
+}
+
+.lede {
+  font-size: 1.06em;
+  line-height: 1.5;
+  color: inherit;
+  max-width: 58ch;
+}
+
+/* ---------- trust chips ---------- */
+
+.trustbar {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.trust {
+  background: var(--paper);
+  padding: 0.85em 0.9em;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.trustMark {
+  color: var(--good);
+  display: grid;
+  flex: 0 0 auto;
+  margin-top: 0.2em;
+}
+
+.trustText {
+  min-width: 0;
+}
+
+.trustText strong {
+  display: block;
+  font-size: 0.92em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.trustText span {
+  display: block;
+  font-size: 0.78em;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+/* ---------- shared panel heading ---------- */
+
+/*
+  .panelhead is a global class. Applying it to a real <h2> keeps the document
+  outline honest (h1 then h2) without changing how the panel looks. Only the
+  font size is reset: the global h2 rule would otherwise win over .panelhead's
+  fixed 17px, and neither of them tracks the text-size control.
+*/
+/* Two classes deep on purpose: this has to outrank both the global `h2` rule
+   and the global `.panelhead` font-size, and CSS Modules gives no guarantee
+   about which stylesheet lands first. */
+.intro .panelHeading {
+  font-size: 1.02em;
+  line-height: 1.35;
+}
+
+/* ---------- 2. three steps ---------- */
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  gap: 16px;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+  min-width: 0;
+  padding: 0.95em 1em 1.05em;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.stepTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin-bottom: 0.2em;
+}
+
+.stepNum {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.9em;
+  min-height: 1.9em;
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-pill);
+  background: var(--navy);
+  color: var(--paper);
+  font-family: var(--font-display), var(--font-ui), sans-serif;
+  font-weight: 800;
+  font-size: 0.92em;
+  line-height: 1;
+  border: 2px solid transparent;
+}
+
+.stepIcon {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2.2em;
+  min-height: 2.2em;
+  padding: 0.25em;
+  border-radius: var(--radius);
+  background: var(--maroon-tint);
+  color: var(--maroon);
+}
+
+/* In high contrast --navy, --maroon, --maroon-tint and --paper are all #000,
+   so both the disc and the digit would disappear. Repaint as outlined shapes.
+   Borders are already forced to #ffe600 by the global html.hc rule. */
+:global(html.hc) .stepNum {
+  background: var(--paper);
+  color: var(--ink);
+  border-style: solid;
+}
+:global(html.hc) .stepIcon {
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--line);
+}
+
+.stepTitle {
+  font-size: 1.04em;
+  font-family: var(--font-display), var(--font-ui), sans-serif;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.stepBody {
+  font-size: 0.86em;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ---------- 3. coverage figures ---------- */
+
+.figures {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 14px;
+}
+
+.figure {
+  min-width: 0;
+  padding: 0.75em 0.9em 0.85em;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--maroon);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+/*
+  Carries the global .kpi class for the display face and tabular numerals, with
+  the size re-expressed in em. .kpi's own clamp is in px, so on its own it
+  would stay put while the rest of the page grew under A+ / A++. Colour stays
+  --ink rather than --maroon: --maroon is #000 in high contrast, which on a
+  #000 paper ground would make the number vanish.
+*/
+.figures .figureValue {
+  font-size: clamp(1.7em, 1.3em + 1.5vw, 2.5em);
+  color: var(--ink);
+}
+
+.figureLabel {
+  margin: 0.25em 0 0;
+  font-size: 0.79em;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.figureNote {
+  margin-top: 14px;
+  font-size: 0.76em;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 84ch;
+}
+
+/* ---------- narrow screens ---------- */
+
+/* Every grid above already collapses to one column via auto-fit well before
+   360px, so this only relieves padding and lets the headline use the gutter. */
+@media (max-width: 430px) {
+  .band {
+    padding: 1.2em 1.05em 1.3em;
+  }
+  .headline {
+    max-width: none;
+  }
+}
+
+/* ---------- motion ---------- */
+
+.stepItem,
+.figure {
+  transition: border-color 120ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepItem,
+  .figure {
+    transition: none;
+  }
+}

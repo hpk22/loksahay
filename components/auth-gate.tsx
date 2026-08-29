@@ -6,6 +6,65 @@ import { isValidMobile } from "@/lib/auth";
 import { useT } from "@/components/i18n-provider";
 
 type Step = "mobile" | "code";
+type Route = "otp" | "password";
+
+const SEEN_KEY = "loksahay.seen-signin";
+
+function readSeen(): boolean {
+  try {
+    return window.localStorage.getItem(SEEN_KEY) === "1";
+  } catch {
+    return true;
+  }
+}
+
+function writeSeen() {
+  try {
+    window.localStorage.setItem(SEEN_KEY, "1");
+  } catch {
+    // Storage may be blocked. The panel simply shows again next time.
+  }
+}
+
+/**
+ * A small question mark button that reveals one line of plain explanation.
+ *
+ * Deliberately click driven and not a CSS hover tooltip, so it works on a
+ * touch screen and for a citizen moving through the form with the keyboard.
+ */
+function Hint({ id, label, text }: { id: string; label: string; text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        className="btn quiet sm"
+        aria-label={label}
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: 26,
+          height: 26,
+          minWidth: 26,
+          padding: 0,
+          borderRadius: "50%",
+          lineHeight: 1,
+          fontWeight: 700,
+        }}
+      >
+        <span aria-hidden="true">?</span>
+      </button>
+      {open ? (
+        <p className="helper" id={id} style={{ width: "100%", margin: 0 }}>
+          {text}
+        </p>
+      ) : (
+        <span id={id} className="sr" />
+      )}
+    </>
+  );
+}
 
 /**
  * Wraps anything a citizen must be signed in to use.
@@ -26,15 +85,22 @@ export function RequireAuth({
   const { session, ready, signIn } = useAuth();
 
   const [step, setStep] = useState<Step>("mobile");
+  const [route, setRoute] = useState<Route>("otp");
   const [mobile, setMobile] = useState("");
+  const [password, setPassword] = useState("");
   const [code, setCode] = useState("");
   const [issued, setIssued] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
 
   const headingRef = useRef<HTMLHeadingElement | null>(null);
   const stepRef = useRef<Step>("mobile");
+
+  useEffect(() => {
+    setShowIntro(!readSeen());
+  }, []);
 
   // Move focus to the heading whenever the step changes, so a screen reader
   // announces the new question instead of leaving the citizen at the old one.
@@ -87,6 +153,17 @@ export function RequireAuth({
   const digitsOnly = (v: string) => v.replace(/\D/g, "");
   const mobileOk = isValidMobile(mobile);
 
+  function dismissIntro() {
+    setShowIntro(false);
+    writeSeen();
+  }
+
+  function completeSignIn(fullName?: string) {
+    writeSeen();
+    setShowIntro(false);
+    signIn(mobile, fullName);
+  }
+
   async function onSendCode(e: React.FormEvent) {
     e.preventDefault();
     if (!mobileOk) {
@@ -95,6 +172,20 @@ export function RequireAuth({
     }
     const sent = await requestCode(mobile);
     if (sent) setStep("code");
+  }
+
+  function onPasswordSignIn(e: React.FormEvent) {
+    e.preventDefault();
+    if (mobile.length !== 10) {
+      setError("Enter the 10 digit mobile number registered with the portal.");
+      return;
+    }
+    if (password.trim().length === 0) {
+      setError("Enter your password, or switch to the one time code.");
+      return;
+    }
+    setError(null);
+    completeSignIn();
   }
 
   async function onResend() {
@@ -108,6 +199,12 @@ export function RequireAuth({
     setStep("mobile");
   }
 
+  function switchRoute(next: Route) {
+    setRoute(next);
+    setError(null);
+    setPassword("");
+  }
+
   function onVerify(e: React.FormEvent) {
     e.preventDefault();
     if (code.length !== 6) {
@@ -119,7 +216,7 @@ export function RequireAuth({
       return;
     }
     setError(null);
-    signIn(mobile, name);
+    completeSignIn(name);
   }
 
   return (
@@ -137,19 +234,60 @@ export function RequireAuth({
 
         <div className="panelbody">
           <div className="stack gap-4" aria-live="polite">
+            {showIntro && step === "mobile" ? (
+              <div className="note brand stack gap-2" style={{ margin: 0 }}>
+                <p className="small" style={{ margin: 0, fontWeight: 700 }}>
+                  New here? Signing in takes three steps.
+                </p>
+                <ol className="small" style={{ margin: 0, paddingLeft: "1.2em" }}>
+                  <li>Enter your mobile number.</li>
+                  <li>We send a six digit code to that number.</li>
+                  <li>Enter the code. That is your account.</li>
+                </ol>
+                <p className="small" style={{ margin: 0 }}>
+                  There is no separate sign up form. A number we have not seen before is
+                  registered automatically.
+                </p>
+                <div className="row">
+                  <button className="btn quiet sm" type="button" onClick={dismissIntro}>
+                    Got it, hide this
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             <p className="lede" style={{ margin: 0 }}>
               {reason ?? "Sign in to continue."}
             </p>
 
             {step === "mobile" ? (
-              <form className="stack gap-4" onSubmit={onSendCode} noValidate>
-                <p className="muted" style={{ margin: 0 }}>
-                  Your number is how the department reaches you about this grievance, and how
-                  you get back into it later without a password.
-                </p>
+              <form
+                className="stack gap-4"
+                onSubmit={route === "otp" ? onSendCode : onPasswordSignIn}
+                noValidate
+              >
+                {route === "otp" ? (
+                  <p className="muted" style={{ margin: 0 }}>
+                    Your number is how the department reaches you about this grievance, and how
+                    you get back into it later without a password.
+                  </p>
+                ) : (
+                  <p className="muted" style={{ margin: 0 }}>
+                    Enter the mobile number registered with the portal and your password.
+                  </p>
+                )}
 
                 <div className="field">
-                  <label htmlFor="loksahay-mobile">{t("file.otp.mobile")}</label>
+                  <div className="row gap-2" style={{ alignItems: "center", flexWrap: "wrap" }}>
+                    <label htmlFor="loksahay-mobile" style={{ margin: 0 }}>
+                      {t("file.otp.mobile")}
+                    </label>
+                    <Hint
+                      id="loksahay-mobile-hint"
+                      label="Why we ask for your mobile number"
+                      text="Used to send your registration number and updates. Only the last four digits are stored with the grievance."
+                    />
+                  </div>
                   <input
                     id="loksahay-mobile"
                     className="input mono"
@@ -167,23 +305,95 @@ export function RequireAuth({
                     aria-invalid={error !== null}
                   />
                   <p className="helper" id="loksahay-mobile-help">
-                    Ten digits, no country code and no spaces.
+                    Your 10 digit mobile number. No country code and no spaces.
                   </p>
                 </div>
 
+                {route === "password" ? (
+                  <div className="field">
+                    <label htmlFor="loksahay-password">Password</label>
+                    <input
+                      id="loksahay-password"
+                      className="input"
+                      type="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setError(null);
+                      }}
+                      aria-describedby="loksahay-password-help"
+                      aria-invalid={error !== null}
+                    />
+                    <p className="helper" id="loksahay-password-help">
+                      The password you set for this portal.
+                    </p>
+                  </div>
+                ) : null}
+
                 {error ? (
-                  <p className="note bad" role="alert" style={{ margin: 0 }}>
+                  <p className="note warn" role="alert" style={{ margin: 0 }}>
                     {error}
                   </p>
                 ) : null}
 
-                <button className="btn primary lg block" type="submit" disabled={!mobileOk || busy}>
-                  {busy ? "Sending the code" : t("file.otp.send")}
+                <button
+                  className="btn primary lg block"
+                  type="submit"
+                  disabled={busy || (route === "otp" ? !mobileOk : mobile.length !== 10)}
+                >
+                  {route === "otp"
+                    ? busy
+                      ? "Sending the code"
+                      : t("file.otp.send")
+                    : "Sign in with password"}
                 </button>
 
-                <p className="small muted" style={{ margin: 0 }}>
-                  There is no separate registration. If this number is new to us you are
-                  registered, and if we already know it you are signed back in.
+                {route === "otp" ? (
+                  <p className="small muted" style={{ margin: 0 }}>
+                    Recommended, no password to remember. There is no separate registration. If
+                    this number is new to us you are registered, and if we already know it you
+                    are signed back in.
+                  </p>
+                ) : null}
+
+                <hr className="divider" />
+
+                <div className="row gap-3" style={{ flexWrap: "wrap" }}>
+                  {route === "otp" ? (
+                    <button
+                      className="btn ghost sm"
+                      type="button"
+                      onClick={() => switchRoute("password")}
+                    >
+                      Use a password instead
+                    </button>
+                  ) : (
+                    <button
+                      className="btn ghost sm"
+                      type="button"
+                      onClick={() => switchRoute("otp")}
+                    >
+                      Use a one time code instead, recommended
+                    </button>
+                  )}
+                </div>
+
+                {route === "otp" ? (
+                  <p className="tiny muted" style={{ margin: 0 }}>
+                    Nothing to forget here. There is no username and no password on this route,
+                    and the code is sent fresh each time you sign in.
+                  </p>
+                ) : (
+                  <p className="tiny muted" style={{ margin: 0 }}>
+                    Forgot your password? Switch to the one time code above and sign in on this
+                    number straight away.
+                  </p>
+                )}
+
+                <p className="tiny muted" style={{ margin: 0 }}>
+                  No security code image to read and copy. The one time code sent to your phone
+                  already proves the number belongs to you.
                 </p>
               </form>
             ) : (
@@ -203,7 +413,16 @@ export function RequireAuth({
                 ) : null}
 
                 <div className="field">
-                  <label htmlFor="loksahay-code">{t("file.otp.enter")}</label>
+                  <div className="row gap-2" style={{ alignItems: "center", flexWrap: "wrap" }}>
+                    <label htmlFor="loksahay-code" style={{ margin: 0 }}>
+                      {t("file.otp.enter")}
+                    </label>
+                    <Hint
+                      id="loksahay-code-hint"
+                      label="What this code is"
+                      text="A six digit code sent to your phone. It replaces a password."
+                    />
+                  </div>
                   <input
                     id="loksahay-code"
                     className="input mono"
@@ -238,7 +457,7 @@ export function RequireAuth({
                 </div>
 
                 {error ? (
-                  <p className="note bad" role="alert" style={{ margin: 0 }}>
+                  <p className="note warn" role="alert" style={{ margin: 0 }}>
                     {error}
                   </p>
                 ) : null}
@@ -265,7 +484,8 @@ export function RequireAuth({
             <hr className="divider" />
 
             <p className="tiny muted" style={{ margin: 0 }}>
-              No password is ever asked for. Your number is kept on this device.
+              The one time code route asks for no password at all. Your number is kept on this
+              device.
             </p>
           </div>
         </div>

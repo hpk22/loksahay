@@ -6,6 +6,8 @@ import { NavIcon } from "@/components/seal";
 import { SiteHeader, GovFooter } from "@/components/chrome";
 import { RequireAuth } from "@/components/auth-gate";
 import { useAuth } from "@/components/auth-provider";
+import { FlowChooser } from "@/components/flow-chooser";
+import { FormFlow, type FormResult } from "@/components/form-flow";
 import { useVoice, MicIcon } from "@/components/voice";
 import { claimMic, useMicClaim } from "@/lib/mic";
 import { useI18n, useT } from "@/components/i18n-provider";
@@ -15,12 +17,23 @@ import { fieldsFor, findMinistry, resolvePath } from "@/lib/taxonomy";
 import type { StringKey } from "@/lib/i18n";
 import type { AgentTurn, Grievance } from "@/lib/types";
 
-type Phase = "chat" | "confirm" | "draft" | "otp" | "done";
+type Phase = "choose" | "chat" | "form" | "confirm" | "draft" | "otp" | "done";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const ORDER: Phase[] = ["chat", "confirm", "draft", "otp", "done"];
 
+/*
+  The chooser is not progress, so it sits outside the stepper. The form and the
+  conversation are the SAME stage, Describe, reached two different ways, so both
+  map to index 0 and the count stays honest at five either way.
+*/
+const STAGE: Record<Phase, number> = {
+  choose: -1, chat: 0, form: 0, confirm: 1, draft: 2, otp: 3, done: 4,
+};
+
 const STEP_KEYS: Record<Phase, StringKey> = {
+  choose: "file.step.describe",
+  form: "file.step.describe",
   chat: "file.step.describe",
   confirm: "file.step.confirm",
   draft: "file.step.review",
@@ -38,7 +51,7 @@ function FilePageInner() {
   const { meta } = useI18n();
   const { session } = useAuth();
 
-  const [phase, setPhase] = useState<Phase>("chat");
+  const [phase, setPhase] = useState<Phase>("choose");
   const [messages, setMessages] = useState<Msg[]>([]);
   const [fields, setFields] = useState<Record<string, string>>({});
   const [turn, setTurn] = useState<AgentTurn | null>(null);
@@ -128,6 +141,9 @@ function FilePageInner() {
     const opening = typeof window !== "undefined" ? sessionStorage.getItem("loksahay:opening") : null;
     if (opening) {
       sessionStorage.removeItem("loksahay:opening");
+      // They have already started talking. Asking them to pick a route now
+      // would be worse than not offering one.
+      setPhase("chat");
       void send(opening, [], {});
     }
   }, [send]);
@@ -151,6 +167,43 @@ function FilePageInner() {
   const nodes = turn?.routing ? resolvePath(turn.routing.ministryId, turn.routing.path) : [];
   const required = turn?.routing ? fieldsFor(turn.routing.ministryId, turn.routing.path) : [];
   const san = cpgramsSanitize(draft);
+
+  /*
+    The form route has no model call in it, so the AgentTurn the confirm, draft
+    and register steps all read from is assembled here. language and
+    languageName matter as much as routing: verifyAndFile reads them, and a turn
+    without them fails at the very last tap.
+  */
+  function applyFormResult(r: FormResult) {
+    setTurn({
+      reply: "",
+      language: meta.tag,
+      languageName: meta.english,
+      scope: "in_scope",
+      routing: { ministryId: r.ministryId, path: r.path, confidence: 1 },
+      fields: r.fields,
+      missing: [],
+      readyToFile: true,
+    });
+    setFields(r.fields);
+    setDraft(r.description);
+    setDraftAscii("");
+    setPhase("confirm");
+
+    // Fire and forget. An empty rendering leaves the character loss panel
+    // exactly as it degrades without this call, so a slow model never holds
+    // anyone up and never half fills the panel.
+    void fetch("/api/render", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: r.description, languageName: meta.english }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((j: { ascii?: string } | null) => {
+        if (j?.ascii) setDraftAscii(j.ascii);
+      })
+      .catch(() => {});
+  }
 
   async function sendOtp() {
     setOtpError(undefined);
@@ -215,6 +268,14 @@ function FilePageInner() {
           <Stepper phase={phase} />
 
           {/* ---------------- describe ---------------- */}
+          {phase === "choose" && (
+            <FlowChooser onPick={(kind) => setPhase(kind === "form" ? "form" : "chat")} />
+          )}
+
+          {phase === "form" && (
+            <FormFlow onComplete={applyFormResult} onBack={() => setPhase("choose")} />
+          )}
+
           {phase === "chat" && (
             <div className="stack gap-4">
               <h1 ref={heading} tabIndex={-1} style={{ outline: "none" }}>
@@ -724,7 +785,8 @@ function FilePageInner() {
 
 function Stepper({ phase }: { phase: Phase }) {
   const t = useT();
-  const at = ORDER.indexOf(phase);
+  const at = STAGE[phase];
+  if (at < 0) return null;
 
   return (
     <div className="stack gap-2">

@@ -293,6 +293,9 @@ function MainNav() {
 export function SiteHeader() {
   return (
     <>
+      <div className="tricolour" role="presentation" aria-hidden>
+        <i /><i /><i />
+      </div>
       <UtilityBar />
       <BrandBar />
       <MainNav />
@@ -334,6 +337,9 @@ export function GovFooter() {
 
   return (
     <footer className="sitefooter">
+      <div className="tricolour" role="presentation" aria-hidden>
+        <i /><i /><i />
+      </div>
       <div className="wrap">
         <div className="footgrid">
           <div className="stack gap-3">

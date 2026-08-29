@@ -15,7 +15,7 @@ import s from "./form-flow.module.css";
   Department owns their problem, and works that out by talking to them. That is
   the right default. It is not the right only option. Someone standing in a
   noisy queue, someone whose phone has no working microphone, someone who has
-  lodged this same grievance four times and knows exactly where it goes — for
+  lodged this same grievance four times and knows exactly where it goes, for
   them a conversation is an obstacle, not a kindness.
 
   So this is the traditional route: pick the Department, walk the category tree,
@@ -37,7 +37,7 @@ import s from "./form-flow.module.css";
   this route and the conversation are both the same "Describe" stage), and
   check admissibility (lib/taxonomy.ts is a closed list of eight central
   Ministries, so an RTI request or a State subject cannot be picked here in the
-  first place — the taxonomy is the safety net).
+  first place, the taxonomy is the safety net).
 
   The microphone is strictly opt-in and never starts by itself. See the note
   above the dictation button.
@@ -52,10 +52,10 @@ import s from "./form-flow.module.css";
 const T = {
   ministryH: "Which of these is your grievance about?",
   ministryHelp:
-    "Pick the one that sounds closest. If two seem to fit, pick either — you are shown where it is going before anything is registered, and you can come back and change it.",
+    "Pick the one that sounds closest. If two seem to fit, pick either, you are shown where it is going before anything is registered, and you can come back and change it.",
   ministryLegend: "The Department your grievance belongs to",
   ministryErr:
-    "Choose the one closest to your grievance. If none of them sounds right, go back and talk it through instead — we will work it out from what you say.",
+    "Choose the one closest to your grievance. If none of them sounds right, go back and talk it through instead, we will work it out from what you say.",
 
   categoryHelp: "Choose the line that describes it best.",
   categoryErr: "Choose one of these to carry on.",
@@ -77,7 +77,7 @@ const T = {
   describePlaceholder:
     "My pension has not been credited for four months. I have been to the bank three times and nobody answers.",
   describeErr:
-    "Please describe what happened in a sentence or two. Even one line in your own words is enough — it is what the officer reads first.",
+    "Please describe what happened in a sentence or two. Even one line in your own words is enough, it is what the officer reads first.",
 
   dictate: "Dictate this instead of typing",
   dictateStop: "Stop dictating",
@@ -94,7 +94,7 @@ const T = {
     "That is how the redress system is arranged today, and it is worth knowing before you rely on it. If nothing happens, there is an independent route, and we show it to you at that point.",
 
   clearedPath:
-    "You changed the Department, so the categories you had chosen were cleared — they belonged to the old one. What you wrote in your own words has been kept.",
+    "You changed the Department, so the categories you had chosen were cleared, they belonged to the old one. What you wrote in your own words has been kept.",
 
   back: "Back",
   backToChoice: "Back to the two ways in",
@@ -379,7 +379,7 @@ export function FormFlow({
 
           {/*
             Not a <select>. A native select carries one line per option, and the
-            one line the live portal picks is the official name — precisely the
+            one line the live portal picks is the official name, precisely the
             failure this service exists to correct. Radios are native controls
             too, keyboard and screen-reader complete, no custom dropdown
             anywhere, and they let what a citizen would actually call the
@@ -387,7 +387,7 @@ export function FormFlow({
           */}
           {/*
             role="radiogroup" is set explicitly because aria-invalid belongs on
-            the group, not on an individual radio — the radio role does not
+            the group, not on an individual radio, the radio role does not
             support it. The legend is named explicitly for the same reason: an
             explicit role overrides the implicit fieldset mapping, so the name
             is wired by hand rather than left to it.

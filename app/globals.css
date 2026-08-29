@@ -194,6 +194,21 @@ textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 
 /* ---------- site chrome ---------- */
 
+/*
+  The national tricolour, as a band across the head of every page. Saffron,
+  white and India green in the flag's own proportions. Kept as a plain band
+  rather than a rendered flag: the flag proper carries the Ashoka Chakra and is
+  governed by the Flag Code, and a band states the same thing without
+  reproducing a protected article.
+*/
+.tricolour { display: flex; height: 5px; width: 100%; }
+.tricolour i { display: block; flex: 1 1 0; }
+.tricolour i:nth-child(1) { background: #ff9933; }
+.tricolour i:nth-child(2) { background: #ffffff; }
+.tricolour i:nth-child(3) { background: #138808; }
+html.hc .tricolour { height: 4px; }
+html.hc .tricolour i { background: #ffe600 !important; }
+
 .topbar {
   background: var(--maroon-deep);
   color: #f3e7ee;

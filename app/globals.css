@@ -201,13 +201,25 @@ textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
   governed by the Flag Code, and a band states the same thing without
   reproducing a protected article.
 */
-.tricolour { display: flex; height: 5px; width: 100%; }
-.tricolour i { display: block; flex: 1 1 0; }
-.tricolour i:nth-child(1) { background: #ff9933; }
-.tricolour i:nth-child(2) { background: #ffffff; }
-.tricolour i:nth-child(3) { background: #138808; }
-html.hc .tricolour { height: 4px; }
-html.hc .tricolour i { background: #ffe600 !important; }
+/*
+  The tricolour is used as meaning rather than as decoration. A stripe across
+  the top says nothing and is ignored within a second. These three roles are
+  read every time somebody uses the service:
+
+    saffron  the action to take next
+    white    the ground it sits on
+    green    a thing that is on track
+
+  So the flag itself appears once, stated properly, and the colours carry
+  status everywhere else.
+*/
+.navbar a[aria-current="page"] {
+  box-shadow: inset 0 -3px 0 0 #138808;
+}
+.tile { border-top-color: #ff9933; }
+.tile:nth-child(2) { border-top-color: #138808; }
+.tile:nth-child(3) { border-top-color: var(--navy); }
+.tile:nth-child(4) { border-top-color: var(--maroon); }
 
 .topbar {
   background: var(--maroon-deep);

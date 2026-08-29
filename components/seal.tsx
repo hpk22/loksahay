@@ -203,3 +203,40 @@ export function NavIcon({
       );
   }
 }
+
+/*
+  The national flag of India, drawn to the proportions the Flag Code sets: a
+  3:2 field in three equal bands, and an Ashoka Chakra of twenty four spokes in
+  navy blue whose diameter equals the depth of the white band.
+
+  Drawn rather than shipped as an image so it stays crisp at any size, needs no
+  network request, and carries a real accessible name. The hairline border
+  exists because the white band would otherwise disappear against a white page.
+*/
+export function IndiaFlag({ size = 34 }: { size?: number }) {
+  const spokes = Array.from({ length: 24 }, (_, i) => i * 15);
+  return (
+    <svg
+      width={size}
+      height={(size * 2) / 3}
+      viewBox="0 0 900 600"
+      role="img"
+      aria-label="Flag of India"
+      style={{ flex: "0 0 auto", borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.18)" }}
+    >
+      <rect width="900" height="200" y="0" fill="#ff9933" />
+      <rect width="900" height="200" y="200" fill="#ffffff" />
+      <rect width="900" height="200" y="400" fill="#138808" />
+      <g transform="translate(450 300)">
+        <circle r="100" fill="none" stroke="#000080" strokeWidth="17" />
+        <circle r="17.5" fill="#000080" />
+        {spokes.map((deg) => (
+          <g key={deg} transform={"rotate(" + deg + ")"}>
+            <line x1="0" y1="0" x2="0" y2="-91" stroke="#000080" strokeWidth="6" />
+            <circle cx="0" cy="-79" r="10" fill="#000080" opacity="0.92" />
+          </g>
+        ))}
+      </g>
+    </svg>
+  );
+}

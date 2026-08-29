@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Seal, FooterBadge, NavIcon } from "./seal";
+import { Seal, FooterBadge, NavIcon, IndiaFlag } from "./seal";
 import { useI18n } from "./i18n-provider";
 import { useAuth } from "./auth-provider";
 import { LANGUAGES } from "@/lib/i18n";
@@ -166,6 +166,12 @@ function UtilityBar() {
           <a href="#main" className="skip sr">
             {t("top.skip")}
           </a>
+          <span className="row" style={{ gap: 9, paddingInlineEnd: 12, marginInlineEnd: 4, borderInlineEnd: "1px solid rgba(255,255,255,0.22)" }}>
+            <IndiaFlag size={26} />
+            <span className="tiny" style={{ opacity: 0.92, fontWeight: 600, letterSpacing: "0.02em" }}>
+              {t("brand.dept")}
+            </span>
+          </span>
           <Link href="/about">{t("nav.about")}</Link>
           <span className="sep" aria-hidden>|</span>
           <Link href="/process">{t("nav.process")}</Link>
@@ -293,9 +299,6 @@ function MainNav() {
 export function SiteHeader() {
   return (
     <>
-      <div className="tricolour" role="presentation" aria-hidden>
-        <i /><i /><i />
-      </div>
       <UtilityBar />
       <BrandBar />
       <MainNav />
@@ -337,13 +340,11 @@ export function GovFooter() {
 
   return (
     <footer className="sitefooter">
-      <div className="tricolour" role="presentation" aria-hidden>
-        <i /><i /><i />
-      </div>
       <div className="wrap">
         <div className="footgrid">
           <div className="stack gap-3">
             <div className="row" style={{ gap: 12 }}>
+              <IndiaFlag size={40} />
               <span style={{ color: "#fff" }}>
                 <Seal size={40} />
               </span>

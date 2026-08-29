@@ -84,7 +84,7 @@ const en = {
   "brand.name": "Loksahay",
   "brand.native": "लोकसहाय",
   "brand.tagline": "Public Grievance Assistance",
-  "brand.line": "Describe your problem once. We find the right office, write it properly and follow it up.",
+  "brand.line": "Loksahay assists citizens in lodging public grievances with the Ministry or Department concerned, and in following them through to disposal.",
   "brand.dept": "Public Grievance Assistance for Citizens of India",
 
   /* navigation */
@@ -237,7 +237,7 @@ const hi: Table = {
   "brand.name": "लोकसहाय",
   "brand.native": "Loksahay",
   "brand.tagline": "जन शिकायत सहायता",
-  "brand.line": "अपनी समस्या एक बार बताइए। सही कार्यालय ढूँढ़ना, शिकायत ठीक से लिखना और उसका अनुसरण करना हमारा काम है।",
+  "brand.line": "लोकसहाय नागरिकों को संबंधित मंत्रालय या विभाग में जन शिकायत दर्ज कराने और निपटान तक उसका अनुसरण करने में सहायता करता है।",
   "brand.dept": "भारत के नागरिकों के लिए जन शिकायत सहायता",
 
   "nav.home": "मुख्य पृष्ठ",

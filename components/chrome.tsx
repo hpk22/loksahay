@@ -231,17 +231,6 @@ function BrandBar() {
           </span>
         </Link>
 
-        <div className="aside stack gap-2" style={{ alignItems: "flex-end" }}>
-          <span className="pill live">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" aria-hidden>
-              <path d="M4 12.5l5.5 5.5L20 6.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            {t("home.trust.1")}
-          </span>
-          <p className="tiny muted" style={{ maxWidth: 250, textAlign: "right", lineHeight: 1.4 }}>
-            {t("brand.line")}
-          </p>
-        </div>
       </div>
     </div>
   );

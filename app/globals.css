@@ -239,7 +239,7 @@ textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
 .topbar .ctl[aria-pressed="true"] { background: #fff; color: var(--maroon-deep); font-weight: 700; border-color: #fff; }
 
 .brandbar { background: var(--paper); border-bottom: 1px solid var(--line); }
-.brandbar .inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; }
+.brandbar .inner { display: flex; align-items: center; gap: 20px; padding: 18px 0; }
 /*
   The masthead lockup follows the structure an Indian department mark uses,
   because the structure is what reads as official: a mark on the left, the
@@ -267,8 +267,6 @@ textarea:focus-visible, select:focus-visible, [tabindex]:focus-visible {
   .brandbar .rule { display: none; }
   .brandbar .kicker { font-size: 11.5px; letter-spacing: 0.08em; }
 }
-.brandbar .aside { text-align: right; }
-@media (max-width: 760px) { .brandbar .aside { display: none; } }
 
 .navbar { background: var(--maroon); position: relative; }
 .navbar ul { list-style: none; display: flex; flex-wrap: wrap; margin: 0; padding: 0; align-items: stretch; }

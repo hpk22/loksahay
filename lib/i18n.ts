@@ -10,6 +10,8 @@
  * return visit, and mirrored to a cookie so the server can honour it later.
  */
 
+import { EXTRA_TABLES } from "./i18n-tables";
+
 export type LangCode =
   | "en" | "hi" | "bn" | "mr" | "ta" | "te" | "gu"
   | "kn" | "ml" | "pa" | "or" | "as" | "ur";
@@ -99,7 +101,7 @@ const en = {
   "home.h1": "Tell us what went wrong.",
   "home.h1.sub": "You do not need to know which ministry it belongs to. That is our work, not yours.",
   "home.box.title": "Describe your problem",
-  "home.box.nologin": "No account needed",
+  "home.box.nologin": "Sign in with your mobile number",
   "home.placeholder": "My pension has not been credited for four months. I have been to the bank three times and nobody answers.",
   "home.speak": "Or say it out loud",
   "home.speak.sub": "Speak in Hindi, Marathi, Tamil and ten more. You do not have to type or to read.",
@@ -112,8 +114,8 @@ const en = {
   "home.trust.2.sub": "The published timeline",
   "home.trust.3": "13 languages",
   "home.trust.3.sub": "Type or speak",
-  "home.trust.4": "No account needed",
-  "home.trust.4.sub": "Mobile number only, at the end",
+  "home.trust.4": "Secure sign in",
+  "home.trust.4.sub": "Mobile number and a one time code",
 
   "home.tiles.title": "What would you like to do?",
   "home.tile.file": "Lodge a grievance",
@@ -175,7 +177,7 @@ const en = {
 
   /* status */
   "status.h1": "Check the status of a grievance",
-  "status.sub": "Enter the registration number you were given. You do not need to sign in.",
+  "status.sub": "Enter the registration number you were given, or pick one of your own below.",
   "status.label": "Registration number",
   "status.check": "Check status",
   "status.none": "We could not find a grievance with that number on this device.",
@@ -250,7 +252,7 @@ const hi: Table = {
   "home.h1": "बताइए, क्या गड़बड़ हुई।",
   "home.h1.sub": "आपको यह जानने की आवश्यकता नहीं कि मामला किस मंत्रालय का है। यह हमारा काम है, आपका नहीं।",
   "home.box.title": "अपनी समस्या बताइए",
-  "home.box.nologin": "खाता बनाने की आवश्यकता नहीं",
+  "home.box.nologin": "मोबाइल नंबर से साइन इन कीजिए",
   "home.placeholder": "मेरी पेंशन चार महीने से नहीं आई है। मैं तीन बार बैंक गया, कोई उत्तर नहीं देता।",
   "home.speak": "या बोलकर बताइए",
   "home.speak.sub": "हिन्दी, मराठी, तमिल सहित तेरह भाषाओं में बोलिए। न लिखना पड़ेगा, न पढ़ना।",
@@ -263,8 +265,8 @@ const hi: Table = {
   "home.trust.2.sub": "निर्धारित समय-सीमा",
   "home.trust.3": "13 भाषाएँ",
   "home.trust.3.sub": "लिखिए या बोलिए",
-  "home.trust.4": "खाता आवश्यक नहीं",
-  "home.trust.4.sub": "अंत में केवल मोबाइल नंबर",
+  "home.trust.4": "सुरक्षित साइन इन",
+  "home.trust.4.sub": "मोबाइल नंबर और एक बार का कोड",
 
   "home.tiles.title": "आप क्या करना चाहते हैं?",
   "home.tile.file": "शिकायत दर्ज करें",
@@ -324,7 +326,7 @@ const hi: Table = {
   "file.done.track": "इस शिकायत को देखें",
 
   "status.h1": "शिकायत की स्थिति देखें",
-  "status.sub": "आपको दी गई पंजीकरण संख्या लिखिए। साइन इन करने की आवश्यकता नहीं।",
+  "status.sub": "आपको दी गई पंजीकरण संख्या लिखिए, या नीचे से अपनी कोई शिकायत चुनिए।",
   "status.label": "पंजीकरण संख्या",
   "status.check": "स्थिति देखें",
   "status.none": "इस उपकरण पर उस संख्या की कोई शिकायत नहीं मिली।",
@@ -358,7 +360,15 @@ const hi: Table = {
   "foot.browsers": "क्रोम, फ़ायरफ़ॉक्स, एज या सफारी के वर्तमान संस्करण में सर्वोत्तम। धीमे कनेक्शन पर भी चलता है।",
 };
 
-/** Filled in by the translation pass. Empty tables fall back to English. */
+/*
+  The tables for the languages beyond English and Hindi live in their own file
+  purely for size. The import there is `import type`, which is erased at build
+  time, so this is a one-way dependency at runtime and not a cycle.
+
+  A language with no table, or a key missing from one, falls through to English
+  rather than rendering blank. A half-translated language still gives a usable
+  page.
+*/
 const TABLES: Record<LangCode, Table> = {
   en: en as unknown as Table,
   hi,
@@ -374,6 +384,10 @@ const TABLES: Record<LangCode, Table> = {
   as: {},
   ur: {},
 };
+
+for (const [code, table] of Object.entries(EXTRA_TABLES)) {
+  TABLES[code as LangCode] = { ...TABLES[code as LangCode], ...table };
+}
 
 export function translate(lang: LangCode, key: StringKey): string {
   return TABLES[lang]?.[key] ?? en[key] ?? key;

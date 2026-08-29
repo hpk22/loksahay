@@ -1,0 +1,231 @@
+/*
+  Styles for components/form-flow.tsx.
+
+  This file is deliberately short. Almost everything the form needs already
+  exists in app/globals.css — .card, .note, .field, .input, .textarea, .btn,
+  .pill, .stack, .row, .small, .tiny, .muted, .sr — and using those keeps the
+  form route looking like the rest of the site rather than like a second
+  product. What is here is only what globals.css does not have: a selectable
+  option row, a breadcrumb strip, and an inline error.
+
+  Rules this file obeys:
+
+  * Colour comes only from the design-system custom properties in
+    app/globals.css, each with a neutral fallback so a token rename upstream
+    degrades rather than breaks. No literal brand hex values.
+  * Foreground colour uses --brand-fg / --accent-fg, never --maroon or --navy.
+    Those collapse to #000 under html.hc, which would put black text on a black
+    ground. The two -fg tokens flip to #ffe600 instead.
+  * html.hc removes every tint and shadow, so anywhere one of those was doing
+    the work of telling two states apart there is a :global(html.hc) rule that
+    puts a border there instead.
+  * html[data-fs="lg"|"xl"] enlarges every text size. Nothing holding text has
+    a fixed height — min-height only.
+  * Layout holds to 360px.
+  * prefers-reduced-motion: reduce removes the transitions.
+*/
+
+/* ------------------------------ breadcrumb ------------------------------- */
+
+/*
+  Present from the moment a Department is chosen and for the whole walk down,
+  because a person four screens deep should never have to guess what they are
+  four screens deep into. The text itself is pathLabel(), which is the same
+  "Ministry >> category >> category" string CPGRAMS prints into the grievance.
+*/
+.crumb {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+  border-left: 4px solid var(--brand-fg, #6b0f3a);
+  background: var(--paper-2, #fbfaf8);
+  border-radius: 0 var(--radius, 8px) var(--radius, 8px) 0;
+  overflow-wrap: anywhere;
+}
+
+:global(html[dir="rtl"]) .crumb {
+  border-left: 0;
+  border-right: 4px solid var(--brand-fg, #6b0f3a);
+  border-radius: var(--radius, 8px) 0 0 var(--radius, 8px);
+}
+
+:global(html.hc) .crumb {
+  border: 1px solid;
+  border-left-width: 4px;
+}
+
+/* --------------------------- step heading -------------------------------- */
+
+/*
+  Focus lands here on every step change so a screen reader is told where it now
+  is. It is a programmatic focus target, not a keyboard stop, so the focus ring
+  would be noise — but only for the mouse. :focus-visible is left alone, which
+  means a keyboard user who reaches it still sees the global ring.
+*/
+.stepHead:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ------------------------------- options --------------------------------- */
+
+.fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/*
+  A real <input type="radio"> inside a <label>, not a styled div pretending to
+  be one. Arrow keys move within the group, the label is the hit area, and the
+  whole row clears the 48px target the rest of the site holds to. On a low-end
+  Android phone this behaves like the platform, because it is the platform.
+*/
+.opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  min-height: var(--tap, 48px);
+  padding: 13px 15px;
+  background: var(--paper, #fff);
+  border: 1.5px solid var(--line-strong, #cbc5bc);
+  border-radius: var(--radius, 8px);
+  cursor: pointer;
+  /* globals.css sets label { display:block; font-weight:700; margin-bottom:6px } */
+  margin-bottom: 0;
+  font-weight: 400;
+  font-size: 1em;
+  transition:
+    border-color 110ms ease,
+    background 110ms ease;
+}
+
+.opt:hover {
+  border-color: var(--accent-fg, #0b2a5b);
+  background: var(--navy-tint, #eef3fb);
+}
+
+/*
+  The chosen row is marked by a thicker border and a tint. The tint disappears
+  under html.hc, so the border thickness is what actually carries the state
+  there, and it is set on both to keep the row from shifting by half a pixel
+  when it is picked.
+*/
+.optOn {
+  border-color: var(--accent-fg, #0b2a5b);
+  border-width: 2px;
+  padding: 12.5px 14.5px;
+  background: var(--navy-tint, #eef3fb);
+}
+
+:global(html.hc) .optOn {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+.radio {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin: 2px 0 0;
+  accent-color: var(--accent-fg, #0b2a5b);
+}
+
+.optText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+/*
+  What a citizen would actually call it, first and largest. "Mobile, internet or
+  landline" is the line a person recognises; "Telecommunications" is the line
+  the file needs. The live portal prints only the second one, which is why
+  people pick the wrong Department and lose weeks.
+*/
+.optPlain {
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.optName {
+  font-size: 0.8em;
+  color: var(--muted, #5c616b);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+/* -------------------------------- errors --------------------------------- */
+
+/*
+  Beside the control, never collected into a summary at the top of the page: a
+  message that says "3 errors" and leaves the citizen to find them is how the
+  existing portal loses people. --bad flips to #ffe600 under html.hc along with
+  everything else, so this stays legible there.
+*/
+.err {
+  color: var(--bad, #a11c15);
+  font-weight: 600;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+/* The row under a service field: its error on the left, its opt-out on the right. */
+.fieldFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.fieldFoot .err {
+  margin-top: 0;
+  flex: 1 1 14ch;
+}
+
+/* Said once, where the change happened, rather than left to be discovered. */
+.cleared {
+  color: var(--warn, #8a5300);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* -------------------------------- actions -------------------------------- */
+
+/*
+  Back first in the source order and on screen, because someone who has taken a
+  wrong turn is the person under pressure. Continue takes the remaining width so
+  it stays the obvious primary. Below 420px they stack, Continue on top, so the
+  main action is not the one under the thumb by accident.
+*/
+.actions {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+@media (max-width: 420px) {
+  .actions {
+    flex-direction: column-reverse;
+  }
+}
+
+/* ---------------------------- reduced motion ----------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .opt {
+    transition: none;
+  }
+}

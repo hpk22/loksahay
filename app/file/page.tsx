@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
+import { NavIcon } from "@/components/seal";
 import { SiteHeader, GovFooter } from "@/components/chrome";
+import { RequireAuth } from "@/components/auth-gate";
+import { useAuth } from "@/components/auth-provider";
 import { useVoice, MicIcon } from "@/components/voice";
 import { claimMic, useMicClaim } from "@/lib/mic";
 import { useI18n, useT } from "@/components/i18n-provider";
@@ -28,11 +31,12 @@ const STEP_KEYS: Record<Phase, StringKey> = {
 /** The name the citizen is talking to. A person, not a database. */
 const HELPER_NAME = "Sahay";
 
-export default function FilePage() {
+function FilePageInner() {
   const t = useT();
   // The chosen interface language seeds speech recognition, so a Tamil
   // speaker is heard in Tamil from the first word rather than after a guess.
   const { meta } = useI18n();
+  const { session } = useAuth();
 
   const [phase, setPhase] = useState<Phase>("chat");
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -45,7 +49,7 @@ export default function FilePage() {
   const [draftAscii, setDraftAscii] = useState("");
   const [attachment, setAttachment] = useState<string>();
 
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState(session?.mobile ?? "");
   const [otpCode, setOtpCode] = useState<string>();
   const [otpInput, setOtpInput] = useState("");
   const [otpError, setOtpError] = useState<string>();
@@ -161,7 +165,9 @@ export default function FilePage() {
   }
 
   async function verifyAndFile() {
-    if (otpInput !== otpCode && otpInput !== "000000") {
+    // A signed in citizen already verified this number to get here. A second
+    // code would be security theatre and one more wall to climb.
+    if (!session && otpInput !== otpCode && otpInput !== "000000") {
       setOtpError("That code does not match. Please check the code shown above and enter it again.");
       return;
     }
@@ -577,7 +583,52 @@ export default function FilePage() {
           )}
 
           {/* ---------------- identity, once, at the end ---------------- */}
-          {phase === "otp" && (
+          {/*
+            Signed in citizens verified this number at the gate, so the last
+            step is a confirmation rather than a second one time code.
+          */}
+          {phase === "otp" && session && (
+            <div className="stack gap-5">
+              <div className="stack gap-2">
+                <h1 ref={heading} tabIndex={-1} style={{ outline: "none" }}>
+                  Confirm and register
+                </h1>
+                <p className="muted small">
+                  You are signed in, so there is nothing further to verify. Check that the number
+                  below is the one the department should use to reach you about this grievance.
+                </p>
+              </div>
+
+              <div className="card row" style={{ gap: 12 }}>
+                <span className="avatar" aria-hidden>
+                  <NavIcon kind="user" size={20} />
+                </span>
+                <span className="grow" style={{ minWidth: 180 }}>
+                  <span className="tiny muted" style={{ display: "block" }}>
+                    Registering as
+                  </span>
+                  <strong className="mono" style={{ fontSize: "1.05em" }}>
+                    {"+91 " + mobile.slice(0, 5) + " " + mobile.slice(5)}
+                  </strong>
+                </span>
+                <Link className="btn quiet sm" href="/signin">
+                  Use another number
+                </Link>
+              </div>
+
+              <p className="small muted">
+                Your registration number is sent to this mobile. Only the last four digits are kept
+                with the grievance itself.
+              </p>
+
+              <button type="button" className="btn action block lg" disabled={busy} onClick={verifyAndFile}>
+                {busy ? "Registering your grievance" : t("file.otp.file")}
+              </button>
+            </div>
+          )}
+
+          {phase === "otp" && !session && (
+
             <div className="stack gap-5">
               <div className="stack gap-2">
                 <h1 ref={heading} tabIndex={-1} style={{ outline: "none" }}>
@@ -889,5 +940,18 @@ function Done({
         </Link>
       </div>
     </div>
+  );
+}
+
+/*
+  Lodging and tracking both act on a real citizen's record, so both sit behind
+  a sign in. The gate renders in place rather than redirecting, which is why
+  nothing already typed is lost when it appears.
+*/
+export default function FilePage() {
+  return (
+    <RequireAuth reason="Sign in to lodge a grievance">
+      <FilePageInner />
+    </RequireAuth>
   );
 }

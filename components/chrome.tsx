@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Seal, FooterBadge } from "./seal";
+import { Seal, FooterBadge, NavIcon } from "./seal";
 import { useI18n } from "./i18n-provider";
+import { useAuth } from "./auth-provider";
 import { LANGUAGES } from "@/lib/i18n";
 
 /*
@@ -15,11 +16,11 @@ import { LANGUAGES } from "@/lib/i18n";
 */
 
 const NAV = [
-  { href: "/", key: "nav.home" },
-  { href: "/file", key: "nav.file" },
-  { href: "/status", key: "nav.status" },
-  { href: "/directory", key: "nav.directory" },
-  { href: "/process", key: "nav.process" },
+  { href: "/", key: "nav.home", icon: "home" },
+  { href: "/file", key: "nav.file", icon: "file" },
+  { href: "/status", key: "nav.status", icon: "status" },
+  { href: "/directory", key: "nav.directory", icon: "directory" },
+  { href: "/process", key: "nav.process", icon: "process" },
 ] as const;
 
 /* ------------------------------------------------------------------ */
@@ -85,6 +86,39 @@ function LanguageSwitcher() {
         </div>
       )}
     </div>
+  );
+}
+
+/*
+  Who is signed in, stated in the masthead rather than buried in a menu. The
+  number is shown as its last four digits only: enough for a citizen to
+  recognise their own account, not enough to expose it to someone reading over
+  their shoulder in a queue.
+*/
+function AccountControl() {
+  const { session, ready, signOut } = useAuth();
+
+  if (!ready) return null;
+
+  if (!session) {
+    return (
+      <Link href="/signin" className="ctl" style={{ display: "inline-flex", alignItems: "center", gap: 7, textDecoration: "none", padding: "4px 12px" }}>
+        <NavIcon kind="user" size={14} />
+        Sign in
+      </Link>
+    );
+  }
+
+  return (
+    <span className="row" style={{ gap: 6 }}>
+      <Link href="/signin" className="ctl" style={{ display: "inline-flex", alignItems: "center", gap: 7, textDecoration: "none", padding: "4px 12px" }}>
+        <NavIcon kind="user" size={14} />
+        <span className="mono">{"••••" + session.last4}</span>
+      </Link>
+      <button type="button" className="ctl" onClick={signOut} aria-label="Sign out">
+        <NavIcon kind="signout" size={14} />
+      </button>
+    </span>
   );
 }
 
@@ -157,6 +191,7 @@ function UtilityBar() {
             {hc ? t("top.contrast.off") : t("top.contrast")}
           </button>
           <LanguageSwitcher />
+          <AccountControl />
         </div>
       </div>
     </div>
@@ -165,17 +200,28 @@ function UtilityBar() {
 
 function BrandBar() {
   const { t } = useI18n();
+  // The service name in Devanagari sits above the rest, the way a department
+  // lockup carries Hindi above English. Dropped when the chosen language
+  // already renders the name in that script, so it is never printed twice.
+  const deva = "लोकसहाय";
+  const showScript = t("brand.name") !== deva;
+
   return (
     <div className="brandbar">
       <div className="wrap inner">
         <Link href="/" className="lockup">
           <span className="mark">
-            <Seal size={58} />
+            <Seal size={62} />
           </span>
+          <span className="rule" aria-hidden />
           <span>
-            <span className="name">{t("brand.name")}</span>
-            <span className="alt">{t("brand.tagline")}</span>
-            <span className="dept">{t("brand.dept")}</span>
+            {showScript && (
+              <span className="script deva" lang="hi">
+                {deva}
+              </span>
+            )}
+            <span className="kicker">{t("brand.name")}</span>
+            <span className="name">{t("brand.tagline")}</span>
           </span>
         </Link>
 
@@ -225,6 +271,7 @@ function MainNav() {
           {NAV.map((n) => (
             <li key={n.href}>
               <Link href={n.href} aria-current={path === n.href ? "page" : undefined}>
+                <NavIcon kind={n.icon} />
                 {t(n.key)}
               </Link>
             </li>
@@ -257,17 +304,23 @@ export function SiteHeader() {
 export function Rail({ current }: { current?: string }) {
   const { t } = useI18n();
   const items = [
-    { href: "/file", key: "nav.file" },
-    { href: "/status", key: "nav.status" },
-    { href: "/directory", key: "nav.directory" },
-    { href: "/process", key: "nav.process" },
-    { href: "/about", key: "nav.about" },
+    { href: "/file", key: "nav.file", icon: "file" },
+    { href: "/status", key: "nav.status", icon: "status" },
+    { href: "/directory", key: "nav.directory", icon: "directory" },
+    { href: "/process", key: "nav.process", icon: "process" },
+    { href: "/about", key: "nav.about", icon: "user" },
   ] as const;
 
   return (
     <nav className="rail" aria-label="Section">
       {items.map((i) => (
-        <Link key={i.href} href={i.href} aria-current={current === i.href ? "page" : undefined}>
+        <Link
+          key={i.href}
+          href={i.href}
+          aria-current={current === i.href ? "page" : undefined}
+          style={{ display: "flex", alignItems: "center", gap: 10 }}
+        >
+          <NavIcon kind={i.icon} />
           {t(i.key)}
         </Link>
       ))}

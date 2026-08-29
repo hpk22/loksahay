@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SiteHeader, GovFooter } from "@/components/chrome";
+import { RequireAuth } from "@/components/auth-gate";
 import { useT } from "@/components/i18n-provider";
 import { findMinistry, pathLabel } from "@/lib/taxonomy";
 import type { Grievance } from "@/lib/types";
@@ -592,7 +593,7 @@ function StatusInner() {
   return id ? <Detail id={id} /> : <Lookup />;
 }
 
-export default function StatusPage() {
+function StatusPageInner() {
   return (
     <>
       <SiteHeader />
@@ -603,5 +604,18 @@ export default function StatusPage() {
       </main>
       <GovFooter />
     </>
+  );
+}
+
+/*
+  Lodging and tracking both act on a real citizen's record, so both sit behind
+  a sign in. The gate renders in place rather than redirecting, which is why
+  nothing already typed is lost when it appears.
+*/
+export default function StatusPage() {
+  return (
+    <RequireAuth reason="Sign in to check the status of your grievance">
+      <StatusPageInner />
+    </RequireAuth>
   );
 }

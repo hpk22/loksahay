@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Inter, Noto_Sans_Devanagari } from "next/font/google
 import "./globals.css";
 import { LanguageProvider } from "@/components/i18n-provider";
 import { LanguageGate } from "@/components/language-gate";
+import { AuthProvider } from "@/components/auth-provider";
 import { Assistant } from "@/components/assistant";
 
 /*
@@ -57,10 +58,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body>
         <LanguageProvider>
-          <LanguageGate />
-          {children}
-          {/* Floating help, on every route except the ones that run their own mic. */}
-          <Assistant />
+          {/* Auth sits inside language, so the sign-in screen speaks the
+              language the citizen chose before they were ever asked to sign in. */}
+          <AuthProvider>
+            <LanguageGate />
+            {children}
+            {/* Floating help, on every route except the ones that run their own mic. */}
+            <Assistant />
+          </AuthProvider>
         </LanguageProvider>
       </body>
     </html>

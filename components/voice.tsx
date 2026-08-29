@@ -135,7 +135,11 @@ export function useVoice(onFinal: (text: string) => void) {
     return () => {
       abortRef.current = true;
       teardown();
-      audioRef.current?.pause();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        // Same release as stop(): unmounting mid-reply must not pin the blob.
+        if (audioRef.current.src.startsWith("blob:")) URL.revokeObjectURL(audioRef.current.src);
+      }
       if (typeof window !== "undefined") window.speechSynthesis?.cancel();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

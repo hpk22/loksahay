@@ -75,9 +75,11 @@ export default function SignInPage() {
   return (
     <>
       <SiteHeader />
-      <main id="main" className="wrap narrow stack gap-5" style={{ paddingTop: 28, paddingBottom: 44 }}>
+      <main id="main" className="stack gap-5" style={{ paddingTop: 8, paddingBottom: 20 }}>
         <RequireAuth reason="Sign in to lodge and track grievances">
-          <SignedIn />
+          <div className="wrap narrow stack gap-5" style={{ paddingTop: 20, paddingBottom: 24 }}>
+            <SignedIn />
+          </div>
         </RequireAuth>
       </main>
       <GovFooter />

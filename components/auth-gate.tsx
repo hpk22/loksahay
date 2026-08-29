@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { IndiaFlag, NavIcon } from "./seal";
 import { useAuth } from "@/components/auth-provider";
 import { isValidMobile } from "@/lib/auth";
 import { useT } from "@/components/i18n-provider";
@@ -220,19 +221,62 @@ export function RequireAuth({
   }
 
   return (
-    <div className="wrap narrow" style={{ paddingTop: 28, paddingBottom: 40 }}>
-      <div className="card">
-        <div className="panelhead">
-          <h1
-            ref={headingRef}
-            tabIndex={-1}
-            style={{ margin: 0, fontSize: "1.35em", outline: "none" }}
-          >
-            {step === "mobile" ? "Sign in with your mobile number" : t("file.otp.enter")}
-          </h1>
-        </div>
+    <div className="wrap" style={{ paddingTop: 26, paddingBottom: 44, maxWidth: 1040 }}>
+      <div className="authgrid">
+        {/* Why the citizen is being asked, stated before they are asked. */}
+        <aside className="authbrand">
+          <div className="row" style={{ gap: 11 }}>
+            <IndiaFlag size={30} />
+            <span className="tiny" style={{ opacity: 0.9, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              {t("brand.name")}
+            </span>
+          </div>
 
-        <div className="panelbody">
+          <div className="stack gap-3">
+            <h2>{reason ?? "Sign in to continue."}</h2>
+            <p className="small" style={{ color: "rgba(255,255,255,0.86)", lineHeight: 1.55 }}>
+              Your mobile number is the account. There is no separate registration form and no
+              password to remember.
+            </p>
+          </div>
+
+          <div className="stack gap-4" style={{ marginTop: "auto" }}>
+            {[
+              { n: "1", t: "Enter your mobile number", s: "Ten digits. Nothing else is asked of you." },
+              { n: "2", t: "We send a six digit code", s: "It arrives in a few seconds and replaces a password." },
+              { n: "3", t: "That is your account", s: "A number we have not seen before is registered automatically." },
+            ].map((p) => (
+              <div className="pt" key={p.n}>
+                <span className="n" aria-hidden>{p.n}</span>
+                <span>
+                  <strong>{p.t}</strong>
+                  <span>{p.s}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <p className="tiny" style={{ color: "rgba(255,255,255,0.7)", borderTop: "1px solid rgba(255,255,255,0.2)", paddingTop: 14 }}>
+            Only the last four digits of your number are stored with a grievance.
+          </p>
+        </aside>
+
+        <div className="authcard">
+          <div className="authcard-head">
+            <h1 ref={headingRef} tabIndex={-1}>
+              {step === "mobile" ? "Sign in" : t("file.otp.enter")}
+            </h1>
+            {step === "mobile" && (
+              <button
+                type="button"
+                className="authswitch"
+                onClick={() => switchRoute(route === "otp" ? "password" : "otp")}
+              >
+                {route === "otp" ? "Use a password" : "Use a one time code"}
+              </button>
+            )}
+          </div>
+
           <div className="stack gap-4" aria-live="polite">
             {showIntro && step === "mobile" ? (
               <div className="note brand stack gap-2" style={{ margin: 0 }}>
@@ -255,10 +299,6 @@ export function RequireAuth({
                 </div>
               </div>
             ) : null}
-
-            <p className="lede" style={{ margin: 0 }}>
-              {reason ?? "Sign in to continue."}
-            </p>
 
             {step === "mobile" ? (
               <form
@@ -358,26 +398,6 @@ export function RequireAuth({
                 ) : null}
 
                 <hr className="divider" />
-
-                <div className="row gap-3" style={{ flexWrap: "wrap" }}>
-                  {route === "otp" ? (
-                    <button
-                      className="btn ghost sm"
-                      type="button"
-                      onClick={() => switchRoute("password")}
-                    >
-                      Use a password instead
-                    </button>
-                  ) : (
-                    <button
-                      className="btn ghost sm"
-                      type="button"
-                      onClick={() => switchRoute("otp")}
-                    >
-                      Use a one time code instead, recommended
-                    </button>
-                  )}
-                </div>
 
                 {route === "otp" ? (
                   <p className="tiny muted" style={{ margin: 0 }}>
@@ -483,9 +503,12 @@ export function RequireAuth({
 
             <hr className="divider" />
 
-            <p className="tiny muted" style={{ margin: 0 }}>
-              The one time code route asks for no password at all. Your number is kept on this
-              device.
+            <p className="tiny muted row" style={{ margin: 0, gap: 8 }}>
+              <span className="ink-brand" aria-hidden style={{ display: "grid" }}>
+                <NavIcon kind="user" size={14} />
+              </span>
+              No security code image to decipher. The one time code already proves the number is
+              yours.
             </p>
           </div>
         </div>

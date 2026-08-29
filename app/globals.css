@@ -572,6 +572,54 @@ html.hc .bubble.me { border: 2px solid #ffe600; }
 .diff .side.loss { border-color: #e8bdb7; background: var(--bad-soft); }
 del { text-decoration: none; background: rgba(161, 28, 21, 0.2); border-bottom: 2px solid var(--bad); border-radius: 2px; }
 
+/* ---------- sign in ---------- */
+
+/*
+  A sign in screen is the first real impression of a public service, and a lone
+  input box on an empty page reads as a checkpoint. So the panel on the left
+  carries the reason the citizen is here and what the service will do, and the
+  card on the right stays uncluttered. On a phone the panel is dropped rather
+  than stacked: at that width it would just push the form below the fold.
+*/
+.authgrid {
+  display: grid; grid-template-columns: 1.05fr 1fr; gap: 0;
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  overflow: hidden; box-shadow: var(--shadow-2); background: var(--paper);
+}
+@media (max-width: 900px) { .authgrid { grid-template-columns: 1fr; } }
+
+.authbrand {
+  background:
+    radial-gradient(700px 300px at 0% 0%, rgba(232, 137, 31, 0.2), transparent 62%),
+    linear-gradient(160deg, var(--maroon) 0%, var(--maroon-deep) 100%);
+  color: #fff; padding: 36px 34px; display: flex; flex-direction: column; gap: 22px;
+}
+.authbrand h2 { color: #fff; font-size: clamp(21px, 2.6vw, 27px); }
+.authbrand .pt { display: flex; gap: 12px; align-items: flex-start; }
+.authbrand .pt .n {
+  width: 27px; height: 27px; border-radius: var(--radius-pill); flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.4);
+  display: grid; place-items: center; font-size: 12.5px; font-weight: 800;
+}
+.authbrand .pt strong { display: block; font-size: 0.95em; }
+.authbrand .pt span { display: block; font-size: 0.83em; color: rgba(255, 255, 255, 0.82); line-height: 1.45; }
+@media (max-width: 900px) { .authbrand { display: none; } }
+html.hc .authbrand { background: #000; border-right: 2px solid #ffe600; }
+html.hc .authbrand h2, html.hc .authbrand .pt span { color: #ffe600; }
+
+.authcard { padding: 34px 32px; display: flex; flex-direction: column; gap: 20px; background: var(--paper); }
+@media (max-width: 560px) { .authcard { padding: 26px 20px; } }
+.authcard-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.authcard-head h1 {
+  font-size: clamp(25px, 3.4vw, 32px); margin: 0; outline: none; color: var(--accent-fg);
+}
+.authswitch {
+  background: var(--paper); border: 1.5px solid var(--line-strong); border-radius: var(--radius);
+  font: inherit; font-size: 0.82em; font-weight: 700; color: var(--accent-fg);
+  padding: 9px 14px; cursor: pointer; min-height: 42px; white-space: nowrap;
+}
+.authswitch:hover { border-color: var(--navy); background: var(--navy-tint); }
+
 /* ---------- language gate ---------- */
 
 .modal {

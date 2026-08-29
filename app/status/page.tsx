@@ -595,15 +595,11 @@ function StatusInner() {
 
 function StatusPageInner() {
   return (
-    <>
-      <SiteHeader />
-      <main id="main" className="wrap stack gap-5" style={{ paddingTop: 24, paddingBottom: 40 }}>
-        <Suspense fallback={<p className="muted">Checking the status.</p>}>
-          <StatusInner />
-        </Suspense>
-      </main>
-      <GovFooter />
-    </>
+    <main id="main" className="wrap stack gap-5" style={{ paddingTop: 24, paddingBottom: 40 }}>
+      <Suspense fallback={<p className="muted">Checking the status.</p>}>
+        <StatusInner />
+      </Suspense>
+    </main>
   );
 }
 
@@ -614,8 +610,12 @@ function StatusPageInner() {
 */
 export default function StatusPage() {
   return (
-    <RequireAuth reason="Sign in to check the status of your grievance">
-      <StatusPageInner />
-    </RequireAuth>
+    <>
+      <SiteHeader />
+      <RequireAuth reason="Sign in to check the status of your grievance">
+        <StatusPageInner />
+      </RequireAuth>
+      <GovFooter />
+    </>
   );
 }

@@ -261,7 +261,6 @@ function FilePageInner() {
 
   return (
     <>
-      <SiteHeader />
 
       <main id="main" className="wrap narrow" style={{ paddingTop: 22, paddingBottom: 48 }}>
         <div className="stack gap-5">
@@ -774,7 +773,6 @@ function FilePageInner() {
         </div>
       </main>
 
-      <GovFooter />
     </>
   );
 }
@@ -1012,8 +1010,12 @@ function Done({
 */
 export default function FilePage() {
   return (
-    <RequireAuth reason="Sign in to lodge a grievance">
-      <FilePageInner />
-    </RequireAuth>
+    <>
+      <SiteHeader />
+      <RequireAuth reason="Sign in to lodge a grievance">
+        <FilePageInner />
+      </RequireAuth>
+      <GovFooter />
+    </>
   );
 }
